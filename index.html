@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VendeFácil - Compra e Venda</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    background-color: #0277bd;
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+  nav a {
+    color: white;
+    margin: 0 10px;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  nav a.active {
+    text-decoration: underline;
+  }
+  main {
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+    background: white;
+    border-radius: 8px;
+    min-height: 450px;
+  }
+  .anuncio {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: #fff;
+    position: relative;
+  }
+  .anuncio.fixo {
+    border-color: #4caf50;
+  }
+  .anuncio-temporario-tag {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ff9800;
+    color: white;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  input[type="text"],
+  input[type="file"],
+  textarea,
+  input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+  textarea {
+    resize: vertical;
+  }
+  button {
+    background-color: #0277bd;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  button:hover {
+    background-color: #015c8e;
+  }
+  footer {
+    background-color: #0277bd;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    margin-top: 30px;
+  }
+  section {
+    display: none;
+  }
+  section.active {
+    display: block;
+  }
+  .whatsapp-link {
+    color: green;
+    font-weight: bold;
+    text-decoration: none;
+  }
+  .whatsapp-link:hover {
+    text-decoration: underline;
+  }
+  .admin-panel {
+    background: #eee;
+    padding: 15px;
+    border-radius: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .admin-btn {
+    background-color: #f44336;
+    width: auto;
+    padding: 5px 10px;
+    font-size: 12px;
+    margin-left: 10px;
+  }
+  .admin-btn.aprovar {
+    background-color: #4caf50;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🛒 VendeFácil</h1>
+  <nav>
+    <a id="link-home" class="active" onclick="showSection('home')">Início</a> |
+    <a id="link-anunciar" onclick="showSection('anunciar')">Quero Anunciar</a> |
+    <a id="link-admin" onclick="showSection('adminLogin')">Admin</a>
+  </nav>
+</header>
+
+<main>
+  <!-- Página Inicial -->
+  <section id="home" class="active">
+    <h2>Buscar Produto</h2>
+    <input type="text" id="busca" placeholder="Digite o que procura..." onkeyup="filtrarAnuncios()" />
+    <h2>Anúncios Recentes</h2>
+    <div id="anuncios"></div>
+    <p id="sem-anuncios" style="display:none;">Nenhum anúncio encontrado.</p>
+  </section>
+
+  <!-- Página Anunciar -->
+  <section id="anunciar">
+    <h2>Quero Anunciar</h2>
+    <p><b>Valor para anunciar:</b> <span style="color:green;">Cada anúncio publicado custa R$ 10,00, pago via Pix. Após o pagamento, envie o comprovante pelo WhatsApp para ativação definitiva do anúncio.</span></p>
+    <p><b>Chave Pix:</b> <span style="color:blue;">(21) 98594-3803</span></p>
+    <p><b>⚠️ Importante:</b> Após realizar o Pix, envie seu comprovante para nosso WhatsApp:</p>
+    <p><a href="https://wa.me/5521985943803" target="_blank" class="whatsapp-link">📲 (21) 98594-3803 - Clique aqui para enviar no WhatsApp</a></p>
+
+    <h3>Dados do Anúncio</h3>
+    <form id="form-anuncio" onsubmit="enviarAnuncio(event)">
+      <label>Nome:</label>
+      <input type="text" id="nome" placeholder="Seu nome" required />
+      <label>Produto:</label>
+      <input type="text" id="produto" placeholder="O que você está vendendo?" required />
+      <label>Descrição:</label>
+      <textarea id="descricao" placeholder="Descreva seu produto..." required></textarea>
+      <label>Preço:</label>
+      <input type="text" id="preco" placeholder="Ex.: R$ 500,00" required />
+      <label>Contato (Telefone/WhatsApp):</label>
+      <input type="text" id="contato" placeholder="(21) 9XXXX-XXXX" required />
+      <label>Fotos do Produto (até 5):</label>
+      <input type="file" id="fotos" accept="image/*" multiple />
+      <button type="submit">Enviar Anúncio</button>
+    </form>
+  </section>
+
+  <!-- Login Admin -->
+  <section id="adminLogin">
+    <h2>Login do Admin</h2>
+    <form onsubmit="loginAdmin(event)">
+      <label>Senha:</label>
+      <input type="password" id="adminSenha" placeholder="Digite a senha" required />
+      <button type="submit">Entrar</button>
+    </form>
+    <p id="loginError" style="color:red; display:none;">Senha incorreta!</p>
+  </section>
+
+  <!-- Painel Admin -->
+  <section id="admin">
+    <h2>Painel do Administrador</h2>
+    <button onclick="logoutAdmin()" style="float:right;">Sair</button>
+    <div class="admin-panel" id="adminPainelAnuncios"></div>
+  </section>
+</main>
+
+<footer>
+  <p>&copy; 2025 VendeFácil - Todos os direitos reservados.</p>
+</footer>
+
+<script>
+  // Tenta carregar os anúncios do localStorage
+  let anuncios = JSON.parse(localStorage.getItem("anuncios")) || [
+    { id: 1, nome: "João", produto: "iPhone 12", descricao: "Perfeito estado", preco: "R$ 3.500", contato: "(21) 91234-5678", fotos: [], temporario: false, fixo: true, timerId: null },
+    { id: 2, nome: "Maria", produto: "Bicicleta Aro 29", descricao: "Nova", preco: "R$ 1.200", contato: "(21) 99876-5432", fotos: [], temporario: false, fixo: true, timerId: null }
+  ];
+
+  // Define idAtual considerando os IDs já existentes para evitar duplicação
+  let idAtual = anuncios.reduce((maxId, an) => an.id > maxId ? an.id : maxId, 0) + 1;
+
+  const senhaAdmin = "vendefacil";
+  let adminLogado = false;
+
+  // Salva anúncios no localStorage sempre que a lista mudar
+  function salvarLocalStorage() {
+    const anunciosParaSalvar = anuncios.map(({timerId, ...resto}) => ({...resto}));
+    localStorage.setItem("anuncios", JSON.stringify(anunciosParaSalvar));
+  }
+
+  function showSection(secao) {
+    document.querySelectorAll("section").forEach((s) => {
+      s.style.display = "none";
+    });
+    document.getElementById(secao).style.display = "block";
+    document.querySelectorAll("nav a").forEach((a) => a.classList.remove("active"));
+    const link = document.getElementById("link-" + secao);
+    if (link) link.classList.add("active");
+    if (secao === "adminLogin") document.getElementById("loginError").style.display = "none";
+  }
+
+  function filtrarAnuncios() {
+    const busca = document.getElementById("busca").value.toLowerCase();
+    const container = document.getElementById("anuncios");
+    container.innerHTML = "";
+    let encontrados = anuncios.filter(an => (an.fixo || an.temporario) &&
+      (an.nome + an.produto + an.descricao + an.preco + an.contato).toLowerCase().includes(busca));
+    encontrados.forEach(an => container.appendChild(criarElementoAnuncio(an)));
+    document.getElementById("sem-anuncios").style.display = encontrados.length === 0 ? "block" : "none";
+  }
+
+  function criarElementoAnuncio(an) {
+    const div = document.createElement("div");
+    div.className = "anuncio";
+    if (an.fixo) div.classList.add("fixo");
+    if (an.temporario) {
+      const tag = document.createElement("div");
+      tag.className = "anuncio-temporario-tag";
+      tag.textContent = "Temporário";
+      div.appendChild(tag);
+    }
+    div.innerHTML += `<h3>${an.produto}</h3>
+      <p>${an.descricao}</p>
+      <p><b>Preço:</b> ${an.preco}</p>
+      <p><b>Contato:</b> ${an.contato}</p>
+      <p><b>Nome:</b> ${an.nome}</p>`;
+
+    if (an.fotos && an.fotos.length > 0) {
+      const fotosDiv = document.createElement("div");
+      fotosDiv.style.display = "flex";
+      fotosDiv.style.gap = "5px";
+      fotosDiv.style.overflowX = "auto";
+      an.fotos.forEach(foto => {
+        const img = document.createElement("img");
+        img.src = foto;
+        img.style.width = "100px";
+        img.style.height = "100px";
+        img.style.objectFit = "cover";
+        img.style.borderRadius = "5px";
+        fotosDiv.appendChild(img);
+      });
+      div.appendChild(fotosDiv);
+    }
+    return div;
+  }
+
+  function enviarAnuncio(event) {
+    event.preventDefault();
+    const nome = document.getElementById("nome").value.trim();
+    const produto = document.getElementById("produto").value.trim();
+    const descricao = document.getElementById("descricao").value.trim();
+    const preco = document.getElementById("preco").value.trim();
+    const contato = document.getElementById("contato").value.trim();
+    const fotosInput = document.getElementById("fotos");
+    const fotos = [];
+    if (fotosInput.files.length > 0) {
+      let carregadas = 0;
+      for (let i = 0; i < Math.min(5, fotosInput.files.length); i++) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          fotos.push(e.target.result);
+          carregadas++;
+          if (carregadas === Math.min(5, fotosInput.files.length)) salvarAnuncio();
+        };
+        reader.readAsDataURL(fotosInput.files[i]);
+      }
+    } else {
+      salvarAnuncio();
+    }
+
+    function salvarAnuncio() {
+      const novo = {
+        id: idAtual++,
+        nome, produto, descricao, preco, contato, fotos,
+        temporario: true, fixo: false, timerId: null,
+      };
+      anuncios.push(novo);
+      salvarLocalStorage();
+      atualizarAnuncios();
+      alert("Seu anúncio está no ar por 2 minutos aguardando pagamento.");
+      document.getElementById("form-anuncio").reset();
+      showSection("home");
+      novo.timerId = setTimeout(() => {
+        const i = anuncios.findIndex(a => a.id === novo.id);
+        if (i !== -1 && anuncios[i].temporario && !anuncios[i].fixo) {
+          anuncios.splice(i, 1);
+          salvarLocalStorage();
+          atualizarAnuncios();
+        }
+      }, 2 * 60 * 1000);
+    }
+  }
+
+  function atualizarAnuncios() {
+    filtrarAnuncios();
+    atualizarPainelAdmin();
+  }
+
+  function loginAdmin(e) {
+    e.preventDefault();
+    const senha = document.getElementById("adminSenha").value;
+    if (senha === senhaAdmin) {
+      adminLogado = true;
+      showSection("admin");
+      atualizarPainelAdmin();
+    } else {
+      document.getElementById("loginError").style.display = "block";
+    }
+    document.getElementById("adminSenha").value = "";
+  }
+
+  function logoutAdmin() {
+    adminLogado = false;
+    showSection("adminLogin");
+  }
+
+  function atualizarPainelAdmin() {
+    if (!adminLogado) return;
+    const painel = document.getElementById("adminPainelAnuncios");
+    painel.innerHTML = "";
+    if (anuncios.length === 0) {
+      painel.innerHTML = "<p>Não há anúncios cadastrados.</p>";
+      return;
+    }
+    for (let an of anuncios) {
+      const div = document.createElement("div");
+      div.style.border = "1px solid #ccc";
+      div.style.padding = "8px";
+      div.style.marginBottom = "8px";
+      div.style.backgroundColor = an.fixo ? "#e8f5e9" : "#fff";
+      div.innerHTML = `
+        <b>${an.produto}</b> - ${an.descricao} <br/>
+        <b>Preço:</b> ${an.preco} <br/>
+        <b>Contato:</b> ${an.contato} <br/>
+        <b>Nome:</b> ${an.nome} <br/>
+        <b>Status:</b> ${an.fixo ? "Aprovado (fixo)" : "Temporário"} 
+      `;
+      const btnRemover = document.createElement("button");
+      btnRemover.textContent = "Remover";
+      btnRemover.className = "admin-btn";
+      btnRemover.onclick = () => {
+        if (confirm("Deseja remover este anúncio?")) removerAnuncio(an.id);
+      };
+      div.appendChild(btnRemover);
+      if (!an.fixo) {
+        const btnAprovar = document.createElement("button");
+        btnAprovar.textContent = "Aprovar";
+        btnAprovar.className = "admin-btn aprovar";
+        btnAprovar.onclick = () => aprovarAnuncio(an.id);
+        div.appendChild(btnAprovar);
+      }
+      painel.appendChild(div);
+    }
+  }
+
+  function removerAnuncio(id) {
+    const i = anuncios.findIndex(a => a.id === id);
+    if (i !== -1) {
+      clearTimeout(anuncios[i].timerId);
+      anuncios.splice(i, 1);
+      salvarLocalStorage();
+      atualizarAnuncios();
+    }
+  }
+
+  function aprovarAnuncio(id) {
+    const an = anuncios.find(a => a.id === id);
+    if (an) {
+      an.fixo = true;
+      an.temporario = false;
+      clearTimeout(an.timerId);
+      an.timerId = null;
+      salvarLocalStorage();
+      atualizarAnuncios();
+      alert("Anúncio aprovado!");
+    }
+  }
+
+  // Inicialização da página
+  atualizarAnuncios();
+  showSection("home");
+</script>
+
+</body>
+</html>
